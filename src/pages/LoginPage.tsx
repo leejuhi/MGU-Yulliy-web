@@ -46,7 +46,7 @@ function LoginPage() {
 		const { email, password } = values;
 		try {
 			await axios.post('/auth/login', { email, password });
-			navigate('/');
+			navigate('/search');
 		} catch (error) {
 			alert('입력 정보가 정확하지 않습니다!');
 		}
