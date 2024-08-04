@@ -1,13 +1,28 @@
 import styled from 'styled-components';
 import Map from '../components/Map';
 import SearchBar from '~/components/map/SearchBar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import axios from '../libs/axios';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '~/components/navBar/NavBar';
+import BottomSheet from '~/components/bottomSheet/BottomSheet';
+import useGetRestaurants from '~/hooks/api/useGetRestaurants';
+import { useSetAtom } from 'jotai';
+import { restaurantAtom } from '~/store/restaurants';
+import Head from '~/components/common/Head';
 
 const HomePage = () => {
 	const navigate = useNavigate();
+	const setRestaurants = useSetAtom(restaurantAtom);
+	const { data } = useGetRestaurants();
+
+	const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
+	useEffect(() => {
+		if (data) {
+			setRestaurants(data);
+		}
+	}, [data, setRestaurants]);
+
 	useEffect(() => {
 		async function checkUser() {
 			try {
@@ -21,15 +36,26 @@ const HomePage = () => {
 		}
 		checkUser();
 	}, [navigate]);
+
+	const handleMapClick = () => {
+		setIsBottomSheetVisible(true);
+	};
+
+	const handleCloseBottomSheet = () => {
+		setIsBottomSheetVisible(false);
+	};
+
 	return (
 		<>
+			<Head title="비밀 지도" />
 			<Container>
-				<SearchBar />
+				<SearchBar bottomSheetClose={handleCloseBottomSheet} />
 				<MapWrapper>
-					<Map />
+					<Map onClick={handleMapClick} />
 				</MapWrapper>
 			</Container>
-			<NavBar />
+			{isBottomSheetVisible && <BottomSheet onClose={handleCloseBottomSheet} />}
+			{!isBottomSheetVisible && <NavBar />}
 		</>
 	);
 };
